@@ -8,11 +8,11 @@ playerSprite.src = "./Assets/SpaceShooterAssets/SpaceShooterAssetPack_Ships.png"
 const background = new Image();
 background.src = "./Assets/background-black.png"
 
-const player = new Player(playerSprite,ctx,canvas,350,300,8,7,8,0,3,3,9,false);
+const player = new Player(playerSprite,ctx,canvas,350,300,8,7,8,0,3,3,4,false);
 const mouse = {x:0, y:0};
 
 window.addEventListener("keydown", (event) =>{
-    console.log(event.code);
+    // console.log(event.code);
     player.keys[event.code] = {'active':true,'uncontrollable':false};
 });
 
@@ -22,16 +22,22 @@ window.addEventListener("keyup", (event) =>{
     }
 });
 
-function mouseEvent(e){
+document.addEventListener("mousemove",(e)=>{
     var bounds = canvas.getBoundingClientRect();
     mouse.x = e.pageX - bounds.left;
     mouse.y = e.pageY - bounds.top;
-}
-document.addEventListener("mousemove",mouseEvent);
+});
 
-function drawSprite(img, sX, sY, sW, sH, dX, dY, dW, dH){
-    ctx.drawImage(img, sX, sY, sW, sH, dX, dY, dW, dH);
-}
+document.addEventListener("mousedown", (e)=>{
+   player.keys[e.button] = {'active':true,'uncontrollable':false};
+});
+
+document.addEventListener("mouseup", (e) =>{
+    if(!player.keys[e.button]['uncontrollable']){
+        delete player.keys[e.button];
+    }
+});
+
 
 let fps, fpsInterval, startTime, now, then, elapsed;
 
@@ -51,13 +57,7 @@ function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-        player.movePlayer(mouse);
-        player.action();
-        drawSprite(
-            playerSprite, player.frameX, player.frameY, player.width, player.height, 
-            player.posX, player.posY, player.scaleW, player.scaleH
-        );
-
+        player.start(mouse);
     }
 }
 
