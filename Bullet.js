@@ -1,8 +1,7 @@
 class Bullet{
-    constructor(trg,ctx,canvas,velocity) {
+    constructor(trg,pantalla,velocity) {
         this.trigger = trg;
-        this.ctx = ctx;
-        this.canvas = canvas;
+        this.pantalla=pantalla;
         this.angle=this.trigger.angleToPivot;
         this.velocity = velocity;
         this.speedX = trg.tipX - trg.centerX;
@@ -13,6 +12,7 @@ class Bullet{
         this.height = 8;
         this.centerX = this.posX - this.width/2;
         this.centerY = this.posY - this.height/2;
+        this.radius = this.width/2;
 
         this.frameX= 32;
         this.frameY= 8;
@@ -24,32 +24,39 @@ class Bullet{
         this.image.src='./Assets/SpaceShooterAssets/SpaceShooterAssetPack_Projectiles.png';
     }
 
+    updateByPosition(){
+        // center
+        this.centerX = this.posX - this.width/2;
+        this.centerY = this.posY - this.height/2;
+    }
+
     draw(){
         if(this.trigger.calcPivot(this.trigger.pivot)){
-            this.ctx.save();
-            this.ctx.translate(this.posX, this.posY);
-            this.ctx.rotate(this.angle);
-            this.ctx.translate(-this.posX, -this.posY);
-            this.ctx.drawImage(this.image, this.frameX, this.frameY, this.width, this.height, this.posX, this.posY, this.scaleW, this.scaleH);
-            this.ctx.restore();
+            this.pantalla.ctx.save();
+            this.pantalla.ctx.translate(this.posX, this.posY);
+            this.pantalla.ctx.rotate(this.angle);
+            this.pantalla.ctx.translate(-this.posX, -this.posY);
+            this.pantalla.ctx.drawImage(this.image, this.frameX, this.frameY, this.width, this.height, this.posX, this.posY, this.scaleW, this.scaleH);
+            this.pantalla.ctx.restore();
         }
     }
 
     run(){
-        if(this.posX > -20 && this.posX < this.canvas.width + 20){
+        if(this.posX > -20 && this.posX < this.pantalla.canvas.width + 20){
             this.posX = this.posX + this.velocity.x;
         }else{
             this.delete = true;
         }
 
-        if(this.posY > -20 && this.posY < this.canvas.height + 20){
+        if(this.posY > -20 && this.posY < this.pantalla.canvas.height + 20){
             this.posY = this.posY + this.velocity.y;
         }else{
             this.delete = true;
         }
 
         if(!this.delete){
-            console.log('¡Disparo!: ',this.posX,',',this.posY);
+            //console.log('¡Disparo!: ',this.posX,',',this.posY);
+            this.updateByPosition();
             this.draw();
         }
     }

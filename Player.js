@@ -1,8 +1,7 @@
 class Player{
     fireDelay = 0;
-    constructor(image,ctx,canvas,posX, posY, width, height, frameX, frameY, scaleW, scaleH,speed, moving=false){
-        this.ctx=ctx;
-        this.canvas = canvas;
+    constructor(image,pantalla,posX, posY, width, height, frameX, frameY, scaleW, scaleH,speed, moving=false){
+        this.pantalla=pantalla;
         this.image = image;
 
         this.posX = posX;
@@ -29,10 +28,10 @@ class Player{
         this.movePlayer();
 
         if(inRange){
-            this.ctx.save();
+            this.pantalla.ctx.save();
             this.drawRotation();
             this.drawSprite(this.image, this.frameX, this.frameY, this.width, this.height, this.posX, this.posY, this.scaleW, this.scaleH)
-            this.ctx.restore();
+            this.pantalla.ctx.restore();
         }else{
             this.drawSprite(this.image, this.frameX, this.frameY, this.width, this.height, this.posX, this.posY, this.scaleW, this.scaleH)
         }
@@ -43,12 +42,12 @@ class Player{
         let inRange = false;
         let xLine = false;
         let yLine = false;
-        if(mouse.x <= this.canvas.width && mouse.x >= 0){
+        if(mouse.x <= this.pantalla.canvas.width && mouse.x >= 0){
             this.pivot.x = mouse.x;
             xLine = true;
         }
 
-        if(mouse.y <= this.canvas.height && mouse.y >= 0){
+        if(mouse.y <= this.pantalla.canvas.height && mouse.y >= 0){
            this.pivot.y = mouse.y; 
            yLine = true;
         }
@@ -90,7 +89,8 @@ class Player{
             if(!e.delete){
                 e.run();
             }else{
-                delete this.bullets[index];
+                this.bullets.splice(index,1);
+
             }
         })
 
@@ -100,15 +100,15 @@ class Player{
     }
     
     drawSprite(img, sX, sY, sW, sH, dX, dY, dW, dH){
-        this.ctx.drawImage(img, sX, sY, sW, sH, dX, dY, dW, dH);
+        this.pantalla.ctx.drawImage(img, sX, sY, sW, sH, dX, dY, dW, dH);
     }
 
     drawRotation(){
-        this.ctx.translate(this.centerX,this.centerY);
+        this.pantalla.ctx.translate(this.centerX,this.centerY);
         this.angleToPivot = Math.atan2(this.pivot.y - this.centerY, this.pivot.x - this.centerX) + Math.PI/2;
-        console.log(this.angleToPivot);
-        this.ctx.rotate(this.angleToPivot);
-        this.ctx.translate(-this.centerX, -this.centerY);
+        //console.log(this.angleToPivot);
+        this.pantalla.ctx.rotate(this.angleToPivot);
+        this.pantalla.ctx.translate(-this.centerX, -this.centerY);
     }
 
     updateCenter(){
@@ -122,7 +122,7 @@ class Player{
             y:Math.sin(this.angleToPivot - Math.PI/2) * 10
         }
         // console.log(velocity);
-        let shoot = new Bullet(this, this.ctx,this.canvas,velocity);
+        let shoot = new Bullet(this, this.pantalla,velocity);
         this.bullets.push(shoot);
     }
 }
