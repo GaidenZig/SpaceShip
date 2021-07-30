@@ -7,8 +7,9 @@ background.src = "./Assets/background-black.png"
 
 const player = new Player(playerSprite,pantalla,350,300,8,7,8,0,3,3,4,false);
 const enemies = [];
-const enemySpawnDelay=120;
+const enemySpawnDelay=60;
 let enemySpawnCount=enemySpawnDelay;
+const animations = [];
 const mouse = {x:0, y:0};
 
 window.addEventListener("keydown", (event) =>{
@@ -42,12 +43,13 @@ function spawnEnemies(){
     if(enemySpawnCount == enemySpawnDelay){
         const e={
             radius:30,
-            width:7,
-            height:8,
+            width:8*2,
+            height:8*2,
             frame:{x:32, y:48},
             scale:{w:2, h:2},
-            velocity:{x:1,y:1},
-            speed:5,
+            velocity:{x:2,y:2},
+            speed:2,
+            angle:Math.random() * (361 - 0) + 0
         }
         
         enemies.push(new Enemy(
@@ -59,7 +61,8 @@ function spawnEnemies(){
             e.frame,
             e.scale,
             e.speed,
-            e.velocity
+            e.velocity,
+            e.angle
         ));
     }
     enemySpawnCount--;
@@ -93,9 +96,23 @@ function animate(){
         spawnEnemies();
         enemies.forEach((e,i)=>{
             if(e.run()){
+                if(e.shooted){
+                    animations.push(new Animation('destroy', e));
+                }
                 enemies.splice(i,1);
             }
         });
+
+        if(animations.length > 0){
+            animations.forEach((e,i)=>{
+                //do animations.
+                if(!e.erase){
+                    e.run();
+                }else{
+                    animations.splice(i,1);
+                }
+            });
+        }
     }
 }
 

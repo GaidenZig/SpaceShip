@@ -1,11 +1,12 @@
 class Enemy{
-    constructor(pantalla,player,radius, width, height, frame, scale,speed,velocity){
+    constructor(pantalla,player,radius, width, height, frame, scale,speed,velocity,angle){
         this.pantalla=pantalla;
         this.image = new Image();
         this.image.src = "./Assets/SpaceShooterAssets/SpaceShooterAssetPack_Ships.png";
         this.player = player;
 
         this.position = {'x':this.pantalla.MinX(), 'y': 0};
+        this.positionRotated = {'x':0,'y':0};
         this.width = width;
         this.height = height;
         this.frame = frame;
@@ -19,19 +20,52 @@ class Enemy{
         };
         this.pivot={'x':this.center.x,'y':this.position.y};
         this.radius = radius;
-        this.velocity=velocity,
 
         this.speed = speed;
         this.bullets=[];
-        // this.cuadraFunc={a:null, b:null, c:null} // f(x)=a(x-c)^2 +b
-        // this.quadraticFunc();
+        this.shooted=false;
+
+        this.destroyAnim={
+            frames:60,
+            width:8,
+            height:8,
+            scale:{
+                w:5,
+                h:5
+            },
+            src:'./Assets/SpaceShooterAssets/SpaceShooterAssetPack_Miscellaneous.png',
+            record:[{
+                fx:72,
+                fy:48,
+                keyFrame:[15,15]
+            },
+            {
+                fx:80,
+                fy:48,
+                keyFrame:[30,30]
+            },
+            {
+                fx:88,
+                fy:48,
+                keyFrame:[45,45]
+            },
+            {
+                fx:96,
+                fy:48,
+                keyFrame:[60,60]
+            }]
+        };
+
+        // f(x) = 0.35(x)^2
+        this.functionCenter = {'x':0,'y':0};
+        this.angle = angle || undefined;
     }
 
     updateByMov(){
         //center
         this.center = {
-            x:this.pantalla.XC(this.position.x) + (this.scale.w / 2),
-            y:this.pantalla.YC(this.position.y) + (this.scale.h / 2)
+            x:this.pantalla.XC(this.positionRotated.x) + (this.scale.w / 2),
+            y:this.pantalla.YC(this.positionRotated.y) + (this.scale.h / 2)
         };
 
         //pivot
@@ -41,7 +75,19 @@ class Enemy{
     run(){
         // running the movement function.
         this.position.y = this.f(this.position.x);
-        this.position.x += this.pantalla.XSTEP;
+        if(this.angle != undefined){
+            let rot = this.rotate(
+                this.functionCenter.x,
+                this.functionCenter.y,
+                this.position.x,
+                this.position.y,
+                this.angle
+            )
+
+            this.positionRotated.x = rot[0];
+            this.positionRotated.y = rot[1];
+        }
+        this.position.x += this.pantalla.XSTEP*this.speed;
 
         // updating position and pivot
         this.updateByMov();
@@ -62,6 +108,7 @@ class Enemy{
 
                 if(dist - this.radius - bullet.radius < 1){
                     this.player.bullets.splice(i,1);
+                    this.shooted=true;
                     return true;
                 }
             }
@@ -70,37 +117,22 @@ class Enemy{
         return false;
     }
 
-    // quadraticFunc(){
-    //     let inRange = false;
-    //     let vertexRadius=20;
-    //     let randomXMax= this.pantalla.center.x + vertexRadius;
-    //     let randomXMin= this.pantalla.center.x - vertexRadius
-    //     let randomYMax= this.pantalla.center.y + vertexRadius;
-    //     let randomYMin= this.pantalla.center.y - vertexRadius
-    //     let x = Math.random()*(randomXMax - randomXMin) + randomXMin;
-    //     let y = Math.random()*(randomYMax - randomYMin) + randomYMin;
-
-    //     do {
-    //         const catA = x - this.pantalla.center.x;
-    //         const catB = y - this.pantalla.center.y;
-    //         const hypothenuse= Math.sqrt(catA*catA + catB*catB);
-    //         if(hypothenuse <= this.radius){
-    //             inRange = true;
-    //         }
-    //     } while (!inRange);
-        
-    //     this.cuadraFunc.b = y;
-    //     this.cuadraFunc.c = x;
-    //     this.cuadraFunc.a = 15;
-    // }
-
     /**
      *f(x) function to produce this.position.y 
      * @param {number} x x position of the enemy
      */
     f(x){
-        // this.position.y = this.cuadraFunc.a * (Math.pow((x - this.cuadraFunc.c),2)) + this.cuadraFunc.b;
-        return Math.pow(x, 2);
+        let y = 0.35*Math.pow(x, 2)
+        return y;
+    }
+    
+    rotate(cx, cy, x, y, angle) {
+        var radians = (Math.PI / 180) * angle,
+            cos = Math.cos(radians),
+            sin = Math.sin(radians),
+            nx = (cos * (x - cx)) + (sin * (y - cy)) + cx,
+            ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
+        return [nx, ny];
     }
 
     outScreen(){
@@ -117,7 +149,7 @@ class Enemy{
             this.image,
             this.frame.x,this.frame.y,
             this.width,this.height,
-            this.pantalla.XC(this.position.x),this.pantalla.YC(this.position.y),
+            this.pantalla.XC(this.positionRotated.x),this.pantalla.YC(this.positionRotated.y),
             this.scale.w,this.scale.h
         );
     }
