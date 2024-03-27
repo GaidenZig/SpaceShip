@@ -1,5 +1,6 @@
 class Bullet{
-    constructor(trg,pantalla,velocity) {
+    constructor(trg, pantalla, velocity, range) {
+        /** @type {Player | undefined} */
         this.trigger = trg;
         this.pantalla=pantalla;
         this.angle=this.trigger.angleToPivot;
@@ -13,6 +14,9 @@ class Bullet{
         this.centerX = this.posX - this.width/2;
         this.centerY = this.posY - this.height/2;
         this.radius = this.width/2;
+        this.range = range || 20;
+        this.countx=0;
+        this.county=0;
 
         this.frameX= 32;
         this.frameY= 8;
@@ -42,13 +46,13 @@ class Bullet{
     }
 
     run(){
-        if(this.posX > -20 && this.posX < this.pantalla.canvas.width + 20){
+        if((this.posX > -20) && (this.posX < this.pantalla.canvas.width + 20) && (this.countx < this.range)){
             this.posX = this.posX + this.velocity.x;
         }else{
             this.delete = true;
         }
 
-        if(this.posY > -20 && this.posY < this.pantalla.canvas.height + 20){
+        if((this.posY > -20) && (this.posY < this.pantalla.canvas.height + 20 ) && (this.county < this.range)){
             this.posY = this.posY + this.velocity.y;
         }else{
             this.delete = true;
@@ -56,6 +60,8 @@ class Bullet{
 
         if(!this.delete){
             //console.log('¡Disparo!: ',this.posX,',',this.posY);
+            this.countx++;
+            this.county++;
             this.updateByPosition();
             this.draw();
         }
